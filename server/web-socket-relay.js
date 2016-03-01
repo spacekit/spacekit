@@ -1,6 +1,7 @@
 'use strict';
 
 const uuid = require('node-uuid');
+const WebSocket = require('ws');
 
 /**
  * A relay that tunnels multiple sockets into one WebSocket.
@@ -43,7 +44,9 @@ class WebSocketRelay {
       message.connectionId = connectionId;
       message.hostname = hostname;
       message.ip = socket.localAddress;
-      this.webSocket.send(JSON.stringify(message));
+      if (this.webSocket.readyState === WebSocket.OPEN) {
+        this.webSocket.send(JSON.stringify(message));
+      }
     };
 
     sendMessage({ type: 'open' });

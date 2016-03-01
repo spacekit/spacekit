@@ -84,9 +84,9 @@ class SpaceKitServer {
     let hostname = webSocket.upgradeReq.headers['x-spacekit-host'];
     let relay = new WebSocketRelay(webSocket);
 
-    let existingWebSocket = this.relays.get(hostname);
-    if (existingWebSocket) {
-      existingWebSocket.close(1001 /* 'going away' */);
+    let existingRelay = this.relays.get(hostname);
+    if (existingRelay) {
+      existingRelay.webSocket.close(1001 /* 'going away' */);
     }
 
     this.relays.set(hostname, relay);
