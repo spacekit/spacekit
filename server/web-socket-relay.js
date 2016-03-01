@@ -26,11 +26,12 @@ class WebSocketRelay {
     this.webSocket.on('message', (message) => {
       message = JSON.parse(message);
       let socket = this.sockets.get(message.connectionId);
-
-      if (message.type === 'data') {
-        socket.write(new Buffer(message.data, 'base64'));
-      } else if (message.type === 'close') {
-        socket.end();
+      if (socket) {
+        if (message.type === 'data') {
+          socket.write(new Buffer(message.data, 'base64'));
+        } else if (message.type === 'close') {
+          socket.end();
+        }
       }
     });
   }
