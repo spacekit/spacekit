@@ -7,12 +7,14 @@ const options = {
   key: fs.readFileSync(process.env.KEY),
   cert: fs.readFileSync(process.env.CERT)
 };
-
 const httpsServer = https.createServer(options);
-httpsServer.listen(443);
-
 const wss = new WebSocketServer({
   server: httpsServer
+});
+
+httpsServer.on('request', (req, res) => {
+  res.writeHead(200);
+  res.end('hello HTTPS world\n');
 });
 
 wss.on('connection', (ws) => {
@@ -24,3 +26,5 @@ wss.on('connection', (ws) => {
     console.log('CLOSE');
   });
 });
+
+httpsServer.listen(443);
