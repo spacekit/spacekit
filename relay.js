@@ -69,6 +69,12 @@ class SpaceKitRelay {
           type: 'close'
         });
       });
+      socket.on('error', () => {
+        this.sendMessage({
+          connectionId: id,
+          type: 'close'
+        });
+      });
     } else if (message.type === 'data') {
       socket.write(new Buffer(message.data, 'base64'));
     } else if (message.type === 'close') {

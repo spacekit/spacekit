@@ -29,7 +29,7 @@ class WebSocketRelay {
       if (message.type === 'data') {
         socket.write(new Buffer(message.data, 'base64'));
       } else if (message.type === 'close') {
-        socket.close();
+        socket.end();
       }
     });
   }
