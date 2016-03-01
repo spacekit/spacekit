@@ -105,7 +105,7 @@ module.exports = SpaceKitServer;
 
 if (require.main === module) {
   const argv = require('yargs')
-    .usage('Usage: node server.js --hostname HOSTNAME --key KEY.pem --cert CERT.pem')
+    .usage('Usage: npm run server -- --hostname HOSTNAME --key KEY.pem --cert CERT.pem')
     .help('h')
     .options('dnsZone', {
       describe: 'the AWS Hosted Zone ID, for dynamic DNS'

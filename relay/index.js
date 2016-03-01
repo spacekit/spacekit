@@ -88,7 +88,7 @@ module.exports = SpaceKitRelay;
 
 if (require.main === module) {
   const argv = require('yargs')
-    .usage('Usage: node relay.js --hostname HOSTNAME')
+    .usage('Usage: npm run relay -- --hostname HOSTNAME')
     .help('h')
     .options('server', {
       describe: 'the spacekit server hostname',
