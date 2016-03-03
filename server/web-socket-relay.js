@@ -36,7 +36,7 @@ class WebSocketRelay {
     });
   }
 
-  addSocket (socket, hostname) {
+  addSocket (socket, hostname, port) {
     let connectionId = uuid.v4();
 
     this.sockets.set(connectionId, socket);
@@ -44,6 +44,7 @@ class WebSocketRelay {
     let sendMessage = (message) => {
       message.connectionId = connectionId;
       message.hostname = hostname;
+      message.port = port || 443;
       message.ip = socket.localAddress;
       if (this.webSocket.readyState === WebSocket.OPEN) {
         this.webSocket.send(JSON.stringify(message));

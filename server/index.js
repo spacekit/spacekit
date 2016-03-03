@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const http = require('http');
 const https = require('https');
 const WebSocketServer = require('ws').Server;
 
@@ -42,6 +43,36 @@ class SpaceKitServer {
     wss.on('headers', (headers) => {
       headers['Access-Control-Allow-Origin'] = '*';
     });
+
+    function requestToString (req) {
+      let lines = [];
+      lines.push(`GET ${req.url} HTTP/1.0`);
+      for (var i = 0; i < req.rawHeaders.length; i += 2) {
+        lines.push(req.rawHeaders[i] + ': ' + req.rawHeaders[i + 1]);
+      }
+      lines.push('');
+      return lines.join('\r\n');
+    }
+
+    var proxy = http.createServer((req, res) => {
+      let socket = req.socket;
+      let head = requestToString(req);
+      if (!req.url.startsWith('/.well-known/acme-challenge/')) {
+        socket.write('HTTP/1.0 400\r\n\r\nnot supported');
+        socket.end();
+      } else {
+        let hostname = req.headers['host'];
+        let relay = this.relays.get(hostname);
+        if (relay) {
+          relay.addSocket(socket, hostname, 80);
+          socket.emit('data', new Buffer(head, 'ascii'));
+        } else {
+          res.writeHead(500, 'no relays');
+          res.end();
+        }
+      }
+    });
+    proxy.listen(80);
 
     // Configure the DNS updater, if applicable.
     if (argv.dnsZone && argv.dnsDomain) {

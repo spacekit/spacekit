@@ -8,7 +8,7 @@ const options = {
 
 https.createServer(options, function (req, res) {
   res.writeHead(200);
-  res.end('hello HTTPS world\n');
+  res.end('hello HTTPS world\n' + req.url);
 }).listen(443, '0.0.0.0', () => {
   console.log(`Server running.`);
 });

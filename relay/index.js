@@ -54,7 +54,7 @@ class SpaceKitRelay {
     let socket = this.outgoingSockets.get(id);
 
     if (message.type === 'open') {
-      socket = net.connect(this.argv.port);
+      socket = net.connect(message.port || this.argv.port);
       this.outgoingSockets.set(id, socket);
       socket.on('data', (data) => {
         this.sendMessage({
