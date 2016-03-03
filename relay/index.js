@@ -46,12 +46,14 @@ class SpaceKitRelay {
   }
 
   sendMessage (json) {
+    console.log('SEND', json);
     this.ws.send(JSON.stringify(json));
   }
 
   handleMessage (message) {
     let id = message.connectionId;
     let socket = this.outgoingSockets.get(id);
+    console.log('msg', message.type, message.data && new Buffer(message.data, 'base64').toString('ascii'));
 
     if (message.type === 'open') {
       socket = net.connect(message.port || this.argv.port);
@@ -78,7 +80,7 @@ class SpaceKitRelay {
     } else if (message.type === 'data') {
       socket.write(new Buffer(message.data, 'base64'));
     } else if (message.type === 'close') {
-      socket.close();
+      socket.end();
       this.outgoingSockets.delete(id);
     }
   }
