@@ -13,7 +13,6 @@ function createTlsProxyServer (connectionHandler) {
     socket.once('data', (initialData) => {
       socket.pause();
       socket.unshift(initialData);
-      socket.push('');
       const hostname = extractHostnameFromSNIBuffer(initialData);
       connectionHandler(socket, hostname);
       socket.resume();

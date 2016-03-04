@@ -5,7 +5,8 @@ const https = require('https');
 const WebSocketServer = require('ws').Server;
 
 const createTlsProxyServer = require('./tls-proxy-server');
-const SubdomainUpdater = require('./subdomain-updater');
+const createAcmeProxyServer = require('./acme-proxy-server');
+const DynamicDNS = require('./dynamic-dns');
 const WebSocketRelay = require('./web-socket-relay');
 
 /**
@@ -43,10 +44,12 @@ class SpaceKitServer {
       headers['Access-Control-Allow-Origin'] = '*';
     });
 
+    // Listen for LetsEncrypt-style ACME verification requests on port 80
+    createAcmeProxyServer(this.handleAcmeConnection.bind(this)).listen(80);
+
     // Configure the DNS updater, if applicable.
-    if (argv.dnsZone && argv.dnsDomain) {
-      this.subdomainUpdater = new SubdomainUpdater(
-        argv.dnsZone, argv.dnsDomain);
+    if (argv.dnsZone) {
+      this.dynamicDNS = new DynamicDNS(argv.dnsZone);
     }
   }
 
@@ -60,6 +63,7 @@ class SpaceKitServer {
    * if one is available.
    */
   handleTlsConnection (socket, hostname) {
+    console.log('new TLS connection', hostname);
     if (hostname === this.argv.hostname) {
       this.httpsServer.emit('connection', socket);
     } else {
@@ -67,6 +71,22 @@ class SpaceKitServer {
       if (relay) {
         relay.addSocket(socket, hostname);
       } else {
+        socket.end();
+      }
+    }
+  }
+
+  handleAcmeConnection (socket, hostname) {
+    console.log('new ACME connection', hostname);
+    if (hostname === this.argv.hostname) {
+      socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+      socket.end();
+    } else {
+      let relay = this.relays.get(hostname);
+      if (relay) {
+        relay.addSocket(socket, hostname, 80);
+      } else {
+        socket.write('HTTP/1.1 500 No Relays Available\r\n\r\n');
         socket.end();
       }
     }
@@ -94,9 +114,17 @@ class SpaceKitServer {
       this.relays.delete(hostname);
     });
 
-    if (this.subdomainUpdater) {
-      this.subdomainUpdater.updateSubdomainWithIp(
-        hostname, webSocket._socket.localAddress);
+    if (this.dynamicDNS) {
+      require('dns').resolve4(this.argv.hostname, (err, addresses) => {
+        if (err) {
+
+        } else {
+          this.dynamicDNS.upsert(hostname, 'A', addresses[0]);
+        }
+      });
+
+      // this.dynamicDNS.pointHostnameToIp(
+      //   hostname, webSocket._socket.localAddress);
     }
   }
 }
@@ -109,10 +137,6 @@ if (require.main === module) {
     .help('h')
     .options('dnsZone', {
       describe: 'the AWS Hosted Zone ID, for dynamic DNS'
-    })
-    .options('dnsDomain', {
-      describe: 'the root domain name, for dynamic DNS',
-      default: 'spacekit.io'
     })
     .options('port', {
       describe: 'the port to listen on',

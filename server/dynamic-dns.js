@@ -5,16 +5,14 @@ AWS.config.credentials = new AWS.SharedIniFileCredentials({
   profile: 'spacekit'
 });
 
-class SubdomainUpdater {
+class DynamicDNS {
 
-  constructor (hostedZoneId, domain) {
+  constructor (hostedZoneId) {
     this.hostedZoneId = hostedZoneId;
-    this.domain = domain;
     this.route53 = new AWS.Route53();
   }
 
-  updateSubdomainWithIp (subdomain, ipAddress) {
-    let hostname = subdomain + '.' + this.domain;
+  upsert (hostname, recordType, recordValue) {
     var params = {
       ChangeBatch: {
         Changes: [
@@ -22,20 +20,21 @@ class SubdomainUpdater {
             Action: 'UPSERT',
             ResourceRecordSet: {
               Name: hostname,
-              Type: 'A',
+              Type: recordType,
               ResourceRecords: [
                 {
-                  Value: ipAddress
+                  Value: recordValue
                 }
               ],
               TTL: 1
             }
           }
         ],
-        Comment: hostname + ' -> ' + ipAddress
+        Comment: hostname + ' -> ' + recordValue
       },
       HostedZoneId: this.hostedZoneId /* required */
     };
+    console.log('DNS:', hostname, '->', recordValue);
 
     return new Promise((resolve, reject) => {
       this.route53.changeResourceRecordSets(params, function (err, data) {
@@ -49,4 +48,4 @@ class SubdomainUpdater {
   }
 }
 
-module.exports = SubdomainUpdater;
+module.exports = DynamicDNS;
