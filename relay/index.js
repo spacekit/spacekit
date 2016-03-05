@@ -32,8 +32,14 @@ class SpaceKitRelay {
       console.log(`Connected!`);
       this.backoff.reset();
     });
-    this.ws.on('message', (message) => {
-      this.handleMessage(JSON.parse(message));
+    let currentMessageHeader = null;
+    this.ws.on('message', (data) => {
+      if (!currentMessageHeader) {
+        currentMessageHeader = JSON.parse(data);
+      } else {
+        this.handleMessage(currentMessageHeader, data);
+        currentMessageHeader = null;
+      }
     });
     this.ws.on('close', () => {
       console.log(`Lost connection to server.`);
@@ -45,41 +51,43 @@ class SpaceKitRelay {
     });
   }
 
-  sendMessage (json) {
-    console.log('SEND', json);
-    this.ws.send(JSON.stringify(json));
+  sendMessage (header, body) {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      console.log('SEND', header, body && body.length);
+      this.ws.send(JSON.stringify(header));
+      this.ws.send(body || new Buffer(0));
+    }
   }
 
-  handleMessage (message) {
-    let id = message.connectionId;
+  handleMessage (header, body) {
+    let id = header.connectionId;
     let socket = this.outgoingSockets.get(id);
-    console.log('msg', message.type, message.data && new Buffer(message.data, 'base64').toString('ascii'));
+    console.log('msg', JSON.stringify(header));
 
-    if (message.type === 'open') {
-      socket = net.connect(message.port || this.argv.port);
+    if (header.type === 'open') {
+      socket = net.connect(header.port);
       this.outgoingSockets.set(id, socket);
       socket.on('data', (data) => {
         this.sendMessage({
           connectionId: id,
-          type: 'data',
-          data: data.toString('base64')
-        });
+          type: 'data'
+        }, data);
       });
       socket.on('close', () => {
         this.sendMessage({
           connectionId: id,
           type: 'close'
-        });
+        }, null);
       });
       socket.on('error', () => {
         this.sendMessage({
           connectionId: id,
           type: 'close'
-        });
+        }, null);
       });
-    } else if (message.type === 'data') {
-      socket.write(new Buffer(message.data, 'base64'));
-    } else if (message.type === 'close') {
+    } else if (header.type === 'data') {
+      socket.write(body);
+    } else if (header.type === 'close') {
       socket.end();
       this.outgoingSockets.delete(id);
     }
