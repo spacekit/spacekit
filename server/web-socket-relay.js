@@ -23,17 +23,38 @@ class WebSocketRelay {
       });
     });
 
-    this.webSocket.on('message', (message) => {
-      message = JSON.parse(message);
-      let socket = this.sockets.get(message.connectionId);
-      if (socket) {
-        if (message.type === 'data') {
-          socket.write(new Buffer(message.data, 'base64'));
-        } else if (message.type === 'close') {
-          socket.end();
-        }
+    let currentMessageHeader = null;
+    this.webSocket.on('message', (data) => {
+      if (!currentMessageHeader) {
+        currentMessageHeader = JSON.parse(data);
+      } else {
+        this.handleRelayMessage(currentMessageHeader, data);
+        currentMessageHeader = null;
       }
     });
+  }
+
+  handleRelayMessage (header, data) {
+    let socket = this.sockets.get(header.connectionId);
+    if (!socket) {
+      return;
+    }
+
+    switch (header.type) {
+      case 'data':
+        socket.write(data);
+        break;
+      case 'close':
+        socket.end();
+        break;
+    }
+  }
+
+  sendMessage (header, body) {
+    if (this.webSocket.readyState === WebSocket.OPEN) {
+      this.webSocket.send(JSON.stringify(header));
+      this.webSocket.send(body || new Buffer(0));
+    }
   }
 
   addSocket (socket, hostname, port) {
@@ -41,28 +62,26 @@ class WebSocketRelay {
 
     this.sockets.set(connectionId, socket);
 
-    let sendMessage = (message) => {
-      message.connectionId = connectionId;
-      message.hostname = hostname;
-      message.port = port || 443;
-      message.ip = socket.localAddress;
-      if (this.webSocket.readyState === WebSocket.OPEN) {
-        this.webSocket.send(JSON.stringify(message));
-      }
-    };
-
-    sendMessage({ type: 'open' });
+    this.sendMessage({
+      connectionId: connectionId,
+      type: 'open',
+      hostname: hostname,
+      port: port || 443
+    }, null);
 
     socket.on('data', (data) => {
-      sendMessage({
-        type: 'data',
-        data: data.toString('base64')
-      });
+      this.sendMessage({
+        connectionId: connectionId,
+        type: 'data'
+      }, data);
     });
 
     socket.on('close', () => {
       this.sockets.delete(connectionId);
-      sendMessage({ type: 'close' });
+      this.sendMessage({
+        connectionId: connectionId,
+        type: 'close'
+      }, null);
     });
   }
 }
