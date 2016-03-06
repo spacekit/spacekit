@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const https = require('https');
+const dns = require('dns');
 const WebSocketServer = require('ws').Server;
 
 const createTlsProxyServer = require('./tls-proxy-server');
@@ -10,17 +11,17 @@ const DynamicDNS = require('./dynamic-dns');
 const WebSocketRelay = require('./web-socket-relay');
 
 /**
- * The SpaceKitServer listens for TLS connections.
+ * The SpaceKitServer listens for TLS connections. Depending on the hostname
+ * (provided by SNI) of the connection, we'll do the following:
  *
  * If the hostname of the incoming connection is the hostname of SpaceKitServer,
- * we will handle the request ourselves. A WebSocket is a connection from a
- * client relay; an HTTP request goes to the API.
+ * we will handle the request ourselves (either a WebSocket or HTTPS request).
  *
  * Otherwise, we will transparently proxy that connection to one of the
  * connected client relays serving the requested hostname (if available).
  *
- * If configured, SpaceKitServer will update DNS records for incoming client
- * relays to point to their dynamic IP.
+ * If configured, SpaceKitServer will act as a dynamic DNS service, updating
+ * DNS records to the appropriate client relay.
  */
 class SpaceKitServer {
 
@@ -76,18 +77,21 @@ class SpaceKitServer {
     }
   }
 
+  /**
+   * Forward ACME TLS certificate exchange requests to a connected relay,
+   * so that users can run providers like Let's Encrypt themselves to receive
+   * certificates.
+   */
   handleAcmeConnection (socket, hostname) {
     console.log('new ACME connection', hostname);
     if (hostname === this.argv.hostname) {
-      socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
-      socket.end();
+      socket.end('HTTP/1.1 404 Not Found\r\n\r\n');
     } else {
       let relay = this.relays.get(hostname);
       if (relay) {
         relay.addSocket(socket, hostname, 80);
       } else {
-        socket.write('HTTP/1.1 500 No Relays Available\r\n\r\n');
-        socket.end();
+        socket.end('HTTP/1.1 500 No Relays Available\r\n\r\n');
       }
     }
   }
@@ -115,45 +119,17 @@ class SpaceKitServer {
     });
 
     if (this.dynamicDNS) {
-      require('dns').resolve4(this.argv.hostname, (err, addresses) => {
+      // TODO: Perform DNS resolution of "this.argv.hostname" only once,
+      // not on every request.
+      dns.resolve4(this.argv.hostname, (err, addresses) => {
         if (err) {
-
+          // TODO: Send an error back to the client.
         } else {
           this.dynamicDNS.upsert(hostname, 'A', addresses[0]);
         }
       });
-
-      // this.dynamicDNS.pointHostnameToIp(
-      //   hostname, webSocket._socket.localAddress);
     }
   }
 }
 
 module.exports = SpaceKitServer;
-
-if (require.main === module) {
-  const argv = require('yargs')
-    .usage('Usage: npm run server -- --hostname HOSTNAME --key KEY.pem --cert CERT.pem')
-    .help('h')
-    .options('dnsZone', {
-      describe: 'the AWS Hosted Zone ID, for dynamic DNS'
-    })
-    .options('port', {
-      describe: 'the port to listen on',
-      default: 443
-    })
-    .options('hostname', {
-      describe: 'the hostname of this server, e.g. "api.spacekit.io"',
-      demand: true
-    })
-    .options('key', {
-      describe: 'the path to the TLS private key for this hostname',
-      demand: true
-    })
-    .options('cert', {
-      describe: 'the path to the TLS certificate for this hostname',
-      demand: true
-    })
-    .argv;
-  module.exports.instance = new SpaceKitServer(argv);
-}
