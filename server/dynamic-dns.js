@@ -1,10 +1,16 @@
 'use strict';
 
 const AWS = require('aws-sdk');
+
+// TODO: configure these via a command-line flag instead
 AWS.config.credentials = new AWS.SharedIniFileCredentials({
   profile: 'spacekit'
 });
 
+/**
+ * A wrapper for Amazon Route 53's DNS service, for the sole purpose of
+ * upserting individual hostname records.
+ */
 class DynamicDNS {
 
   constructor (hostedZoneId) {
@@ -26,7 +32,7 @@ class DynamicDNS {
                   Value: recordValue
                 }
               ],
-              TTL: 1
+              TTL: 1 // TODO: make configurable
             }
           }
         ],

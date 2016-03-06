@@ -5,11 +5,15 @@ const WebSocket = require('ws');
 
 /**
  * A relay that tunnels multiple sockets into one WebSocket.
- * This is the server-side protocol of the relay that runs
+ * This is the server-side protocol of the relay that runs behind the firewall
  * on the client machine.
  *
- * Raw TCP streams are forwarded into the webSocket using
- * custom JSON messages like 'open', 'data', and 'close'.
+ * Raw TCP streams are forwarded into the websocket using a simple protocol:
+ *
+ * socket.send(jsonHeader); // sent as string
+ * socket.send(binaryBody); // sent as binary
+ *
+ * For now, these messages just proxy socket messages ('open', 'data', 'close').
  */
 class WebSocketRelay {
 

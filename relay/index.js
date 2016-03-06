@@ -4,10 +4,20 @@ const WebSocket = require('ws');
 const net = require('net');
 const backoff = require('backoff');
 
+/**
+ * A SpaceKitRelay proxies data between a SpaceKitServer and local servers.
+ * Only TLS traffic is proxied; each app server must serve its own certificate.
+ * (The SpaceKitServer does allow ACME (LetsEncrypt) traffic through.)
+ *
+ *     [SpaceKitServer] <------ws-------- [SpaceKitRelay]
+ *             |            internet          /   \
+ *             |                             /     \
+ *          client                       tls-app  tls-app
+ */
 class SpaceKitRelay {
   constructor (argv) {
     this.argv = argv;
-    this.url = `wss://${argv.server}/`;
+    this.url = `wss://${argv.endpoint}/`;
 
     this.outgoingSockets = new Map();
 
@@ -95,23 +105,3 @@ class SpaceKitRelay {
 }
 
 module.exports = SpaceKitRelay;
-
-if (require.main === module) {
-  const argv = require('yargs')
-    .usage('Usage: npm run relay -- --hostname HOSTNAME')
-    .help('h')
-    .options('server', {
-      describe: 'the spacekit server hostname',
-      default: 'api.spacekit.io'
-    })
-    .options('port', {
-      describe: 'the port your application server is listening on',
-      default: 443
-    })
-    .options('hostname', {
-      describe: 'the hostname of this server, e.g. "home.mcav.spacekit.io"',
-      demand: true
-    })
-    .argv;
-  module.exports.instance = new SpaceKitRelay(argv);
-}
