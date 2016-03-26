@@ -17,7 +17,8 @@ const backoff = require('backoff');
 class SpaceKitRelay {
   constructor (argv) {
     this.argv = argv;
-    this.url = `wss://${argv.endpoint}/`;
+    this.url = `wss://${argv.service}.${argv.host}/`;
+    this.hostname = `${argv.relay}.${argv.username}.${argv.host}`;
 
     this.outgoingSockets = new Map();
 
@@ -36,10 +37,14 @@ class SpaceKitRelay {
   connect () {
     console.log(`Connecting to ${this.url}...`);
     this.ws = new WebSocket(this.url, 'spacekit', {
-      headers: { 'x-spacekit-host': this.argv.hostname }
+      headers: {
+        'x-spacekit-host': this.hostname,
+        'x-spacekit-username': this.argv.username,
+        'x-spacekit-apikey': this.argv.apikey
+      }
     });
     this.ws.on('open', () => {
-      console.log(`Connected!`);
+      console.log(`Connected to service as ${this.hostname}`);
       this.backoff.reset();
     });
     let currentMessageHeader = null;

@@ -65,7 +65,7 @@ class SpaceKitServer {
    */
   handleTlsConnection (socket, hostname) {
     console.log('new TLS connection', hostname);
-    if (hostname === this.argv.hostname) {
+    if (hostname === `${this.argv.server}.${this.argv.host}`) {
       this.httpsServer.emit('connection', socket);
     } else {
       let relay = this.relays.get(hostname);
@@ -84,7 +84,7 @@ class SpaceKitServer {
    */
   handleAcmeConnection (socket, hostname) {
     console.log('new ACME connection', hostname);
-    if (hostname === this.argv.hostname) {
+    if (hostname === `${this.argv.server}.${this.argv.host}`) {
       socket.end('HTTP/1.1 404 Not Found\r\n\r\n');
     } else {
       let relay = this.relays.get(hostname);
@@ -106,6 +106,11 @@ class SpaceKitServer {
    */
   handleWebSocketConnection (webSocket) {
     let hostname = webSocket.upgradeReq.headers['x-spacekit-host'];
+    // let username = webSocket.upgradeReq.headers['x-spacekit-username'];
+    // let apikey = webSocket.upgradeReq.headers['x-spacekit-apikey'];
+
+    // TODO: Authenticate connection
+
     let relay = new WebSocketRelay(webSocket);
 
     let existingRelay = this.relays.get(hostname);
@@ -114,14 +119,15 @@ class SpaceKitServer {
     }
 
     this.relays.set(hostname, relay);
+
     webSocket.on('close', () => {
       this.relays.delete(hostname);
     });
 
     if (this.dynamicDNS) {
-      // TODO: Perform DNS resolution of "this.argv.hostname" only once,
-      // not on every request.
-      dns.resolve4(this.argv.hostname, (err, addresses) => {
+      // TODO: Perform DNS resolution of `${this.argv.server}.${this.argv.host}`
+      // only once, not on every request.
+      dns.resolve4(`${this.argv.server}.${this.argv.host}`, (err, addresses) => {
         if (err) {
           // TODO: Send an error back to the client.
         } else {
