@@ -39,6 +39,10 @@ class SpaceKitServer {
       key: fs.readFileSync(argv.key),
       cert: fs.readFileSync(argv.cert)
     });
+    this.httpsServer.on('request', (req, res) => {
+      res.writeHead(200);
+      res.end('hello from the api server\n');
+    });
     const wss = new WebSocketServer({ server: this.httpsServer });
     wss.on('connection', this.handleWebSocketConnection.bind(this));
     wss.on('headers', (headers) => {
