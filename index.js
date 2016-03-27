@@ -43,7 +43,7 @@ the complete hostname (ex: <service>.<host>)`
   },
   server: {
     describe: `run in server mode; uses value as subdomain with <host>
-to create the complete hostname (ex: <server>.<host>)`
+to create the complete hostname (ex: "<server>.<host>")`
   },
   relay: {
     describe: `run in relay mode; uses value as subdomain for dynamic dns

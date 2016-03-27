@@ -105,15 +105,16 @@ class SpaceKitServer {
    * If we're configured to update DNS, do so now.
    */
   handleWebSocketConnection (webSocket) {
-    let hostname = webSocket.upgradeReq.headers['x-spacekit-hostname'];
-    // let username = webSocket.upgradeReq.headers['x-spacekit-username'];
+    let subdomain = webSocket.upgradeReq.headers['x-spacekit-subdomain'];
+    let username = webSocket.upgradeReq.headers['x-spacekit-username'];
     // let apikey = webSocket.upgradeReq.headers['x-spacekit-apikey'];
 
     // TODO: Authenticate connection
 
+    let hostname = `${subdomain}.${username}.${this.argv.host}`;
     let relay = new WebSocketRelay(webSocket);
-
     let existingRelay = this.relays.get(hostname);
+
     if (existingRelay) {
       existingRelay.webSocket.close(1001 /* 'going away' */);
     }
