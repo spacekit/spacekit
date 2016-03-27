@@ -60,8 +60,8 @@ to create the complete hostname (ex: <server>.<host>)`
 .help()
 .usage(`
 Usage:
-  spacekit --server api -d $HOSTED_ZONE_ID -k /path/to/key -c /path/to/cert
-  spacekit --relay home -u rizzle -a 9e67e4d`)
+  spacekit --relay home -u rizzle -a 9e67e4d
+  spacekit --server api -d $HOSTED_ZONE_ID -k /path/to/key -c /path/to/cert`)
 .argv;
 
 if (argv.server) {

@@ -38,7 +38,7 @@ class SpaceKitRelay {
     console.log(`Connecting to ${this.url}...`);
     this.ws = new WebSocket(this.url, 'spacekit', {
       headers: {
-        'x-spacekit-host': this.hostname,
+        'x-spacekit-hostname': this.hostname,
         'x-spacekit-username': this.argv.username,
         'x-spacekit-apikey': this.argv.apikey
       }

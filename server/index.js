@@ -105,7 +105,7 @@ class SpaceKitServer {
    * If we're configured to update DNS, do so now.
    */
   handleWebSocketConnection (webSocket) {
-    let hostname = webSocket.upgradeReq.headers['x-spacekit-host'];
+    let hostname = webSocket.upgradeReq.headers['x-spacekit-hostname'];
     // let username = webSocket.upgradeReq.headers['x-spacekit-username'];
     // let apikey = webSocket.upgradeReq.headers['x-spacekit-apikey'];
 
