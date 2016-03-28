@@ -145,9 +145,9 @@ class SpaceKitServer {
             console.log('ws auth failed', hostname, 'apikey incorrect');
             return webSocket.close();
           }
-        });
 
-        this.handleWebSocketConnection(webSocket, hostname);
+          this.handleWebSocketConnection(webSocket, hostname);
+        });
       });
     });
   }
