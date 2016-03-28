@@ -19,7 +19,7 @@ class DynamicDNS {
   }
 
   upsert (hostname, recordType, recordValue) {
-    var params = {
+    let params = {
       ChangeBatch: {
         Changes: [
           {

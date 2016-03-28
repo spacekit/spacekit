@@ -1,3 +1,4 @@
+'use strict';
 const net = require('net');
 
 /**
@@ -65,7 +66,7 @@ function extractHostnameFromSNIBuffer (buffer) {
     return null;
   }
   // Session ID Length (static position)
-  var currentPos = 43;
+  let currentPos = 43;
   // Skip session IDs
   currentPos += 1 + buffer[currentPos];
   // skip Cipher Suites
@@ -77,7 +78,7 @@ function extractHostnameFromSNIBuffer (buffer) {
   while (currentPos < buffer.length) {
     if (buffer.readInt16BE(currentPos) === 0) {
       // we have found an SNI
-      var sniLength = buffer.readInt16BE(currentPos + 2);
+      let sniLength = buffer.readInt16BE(currentPos + 2);
       currentPos += 4;
       if (buffer[currentPos] !== 0) {
         // the RFC says this is a reserved host type, not DNS

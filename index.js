@@ -35,6 +35,11 @@ let argv = yargs.options({
     default: 443,
     describe: 'the port the server binds to'
   },
+  pg: {
+    alias: 'postgres',
+    describe: `The Postgres connection string
+(ex: "postgres://username:password@host/database")`
+  },
   s: {
     alias: 'service',
     default: 'api',
@@ -53,7 +58,7 @@ to create the complete hostname (ex: "<server>.<host>")`
 .group(['relay', 'username', 'apikey', 'host', 'service'], 'Relay options:')
 .implies('relay', 'username')
 .implies('relay', 'apikey')
-.group(['server', 'dnsZone', 'key', 'cert', 'host', 'port'], 'Server options:')
+.group(['server', 'postgres', 'dnsZone', 'key', 'cert', 'host', 'port'], 'Server options:')
 .implies('server', 'dnsZone')
 .implies('server', 'key')
 .implies('server', 'cert')
@@ -61,7 +66,8 @@ to create the complete hostname (ex: "<server>.<host>")`
 .usage(`
 Usage:
   spacekit --relay home -u rizzle -a 9e67e4d
-  spacekit --server api -d $HOSTED_ZONE_ID -k /path/to/key -c /path/to/cert`)
+  spacekit --server api -pg $PG_CONN -d $HOSTED_ZONE_ID \\
+           -k /path/to/key -c /path/to/cert`)
 .argv;
 
 if (argv.server) {

@@ -24,7 +24,11 @@
   "dependencies": {
     "aws-sdk": "^2.2.38",
     "backoff": "^2.4.1",
+    "bcrypt": "^0.8.5",
+    "express": "^4.13.4",
     "node-uuid": "^1.4.7",
+    "pg": "^4.5.1",
+    "pg-native": "^1.10.0",
     "ws": "1.0.1",
     "yargs": "^4.2.0"
   },
