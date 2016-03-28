@@ -66,7 +66,7 @@ to create the complete hostname (ex: "<server>.<host>")`
 .usage(`
 Usage:
   spacekit --relay home -u rizzle -a 9e67e4d
-  spacekit --server api -pg $PG_CONN -d $HOSTED_ZONE_ID \\
+  spacekit --server api --pg $PG_CONN -d $HOSTED_ZONE_ID \\
            -k /path/to/key -c /path/to/cert`)
 .argv;
 
