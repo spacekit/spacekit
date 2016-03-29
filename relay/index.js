@@ -1,8 +1,9 @@
 'use strict';
-
 const WebSocket = require('ws');
-const net = require('net');
-const backoff = require('backoff');
+const Net = require('net');
+const Backoff = require('backoff');
+
+const Config = require('../config');
 
 /**
  * A SpaceKitRelay proxies data between a SpaceKitServer and local servers.
@@ -15,14 +16,13 @@ const backoff = require('backoff');
  *          client                       tls-app  tls-app
  */
 class SpaceKitRelay {
-  constructor (argv) {
-    this.argv = argv;
-    this.url = `wss://${argv.service}.${argv.host}/`;
-    this.hostname = `${argv.relay}.${argv.username}.${argv.host}`;
+  constructor () {
+    this.url = `wss://${Config.service}.${Config.host}/`;
+    this.hostname = `${Config.relay}.${Config.username}.${Config.host}`;
 
     this.outgoingSockets = new Map();
 
-    this.backoff = backoff.fibonacci({
+    this.backoff = Backoff.fibonacci({
       randomisationFactor: 0.4,
       initialDelay: 1000,
       maxDelay: 5 * 60000
@@ -38,9 +38,9 @@ class SpaceKitRelay {
     console.log(`Connecting to ${this.url}...`);
     this.ws = new WebSocket(this.url, 'spacekit', {
       headers: {
-        'x-spacekit-subdomain': this.argv.relay,
-        'x-spacekit-username': this.argv.username,
-        'x-spacekit-apikey': this.argv.apikey
+        'x-spacekit-subdomain': Config.relay,
+        'x-spacekit-username': Config.username,
+        'x-spacekit-apikey': Config.apikey
       }
     });
     this.ws.on('open', () => {
@@ -80,7 +80,7 @@ class SpaceKitRelay {
     console.log('msg', JSON.stringify(header));
 
     if (header.type === 'open') {
-      socket = net.connect(header.port);
+      socket = Net.connect(header.port);
       this.outgoingSockets.set(id, socket);
       socket.on('data', (data) => {
         this.sendMessage({

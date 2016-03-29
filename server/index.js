@@ -1,12 +1,13 @@
 'use strict';
-const Fs = require('fs');
-const Pg = require('pg').native;
-const Https = require('https');
-const Dns = require('dns');
 const Bcrypt = require('bcrypt');
+const Dns = require('dns');
+const Fs = require('fs');
+const Https = require('https');
 const WebSocketServer = require('ws').Server;
 
 const Api = require('../api');
+const Config = require('../config');
+const Db = require('../db');
 const CreateTlsProxyServer = require('./tls-proxy-server');
 const CreateAcmeProxyServer = require('./acme-proxy-server');
 const DynamicDNS = require('./dynamic-dns');
@@ -27,19 +28,18 @@ const WebSocketRelay = require('./web-socket-relay');
  */
 class SpaceKitServer {
 
-  constructor (argv) {
+  constructor () {
     this.relays = new Map(); // hostname -> WebSocketRelay
-    this.argv = argv;
 
     // Listen for any incoming TLS connections.
-    CreateTlsProxyServer(this.handleTlsConnection.bind(this)).listen(argv.port);
+    CreateTlsProxyServer(this.handleTlsConnection.bind(this)).listen(Config.port);
 
     // An HTTPS server will handle our API requests (and WebSocket upgrades).
     // Note: This server doesn't actually listen for requests; we hand it
     // established connections from the TLS proxy handler.
     this.httpsServer = Https.createServer({
-      key: Fs.readFileSync(argv.key),
-      cert: Fs.readFileSync(argv.cert)
+      key: Fs.readFileSync(Config.key),
+      cert: Fs.readFileSync(Config.cert)
     }, Api);
 
     const wss = new WebSocketServer({ server: this.httpsServer });
@@ -52,8 +52,8 @@ class SpaceKitServer {
     CreateAcmeProxyServer(this.handleAcmeConnection.bind(this)).listen(80);
 
     // Configure the DNS updater, if applicable.
-    if (argv.dnsZone) {
-      this.dynamicDNS = new DynamicDNS(argv.dnsZone);
+    if (Config.dnsZone) {
+      this.dynamicDNS = new DynamicDNS(Config.dnsZone);
     }
   }
 
@@ -68,7 +68,7 @@ class SpaceKitServer {
    */
   handleTlsConnection (socket, hostname) {
     console.log('new TLS connection', hostname);
-    if (hostname === `${this.argv.server}.${this.argv.host}`) {
+    if (hostname === `${Config.server}.${Config.host}`) {
       this.httpsServer.emit('connection', socket);
     } else {
       let relay = this.relays.get(hostname);
@@ -87,7 +87,7 @@ class SpaceKitServer {
    */
   handleAcmeConnection (socket, hostname) {
     console.log('new ACME connection', hostname);
-    if (hostname === `${this.argv.server}.${this.argv.host}`) {
+    if (hostname === `${Config.server}.${Config.host}`) {
       socket.end('HTTP/1.1 404 Not Found\r\n\r\n');
     } else {
       let relay = this.relays.get(hostname);
@@ -106,7 +106,7 @@ class SpaceKitServer {
     let subdomain = webSocket.upgradeReq.headers['x-spacekit-subdomain'];
     let username = webSocket.upgradeReq.headers['x-spacekit-username'];
     let apikey = webSocket.upgradeReq.headers['x-spacekit-apikey'];
-    let hostname = `${subdomain}.${username}.${this.argv.host}`;
+    let hostname = `${subdomain}.${username}.${Config.host}`;
     let existingRelay = this.relays.get(hostname);
 
     if (existingRelay) {
@@ -114,40 +114,32 @@ class SpaceKitServer {
       return webSocket.close();
     }
 
-    Pg.connect(this.argv.postgres, (err, client, done) => {
+    let query = `SELECT id, apikey FROM users WHERE username = $1`;
+
+    Db.run(query, [username], (err, result) => {
       if (err) {
-        console.log('ws auth failed', hostname, 'pg connect err');
+        console.log('ws auth failed', hostname, 'db query error', err);
         return webSocket.close();
       }
 
-      let query = `SELECT id, apikey FROM users WHERE username = $1`;
+      if (result.rows.length === 0) {
+        console.log('ws auth failed', hostname, 'not found');
+        return webSocket.close();
+      }
 
-      client.query(query, [username], (err, result) => {
-        done(); // release client
-
+      Bcrypt.compare(apikey, result.rows[0].apikey, (err, pass) => {
         if (err) {
-          console.log('ws auth failed', hostname, 'query error', err);
+          console.log('ws auth failed', hostname, 'bcrypt compare error');
           return webSocket.close();
         }
 
-        if (result.rows.length === 0) {
-          console.log('ws auth failed', hostname, 'not found');
+        if (!pass) {
+          console.log('ws auth failed', hostname, 'apikey was incorrect');
           return webSocket.close();
         }
 
-        Bcrypt.compare(apikey, result.rows[0].apikey, (err, pass) => {
-          if (err) {
-            console.log('ws auth failed', hostname, 'bcrypt compare err');
-            return webSocket.close();
-          }
-
-          if (!pass) {
-            console.log('ws auth failed', hostname, 'apikey incorrect');
-            return webSocket.close();
-          }
-
-          this.handleWebSocketConnection(webSocket, hostname);
-        });
+        console.log('ws auth success', hostname);
+        this.handleWebSocketConnection(webSocket, hostname);
       });
     });
   }
@@ -170,9 +162,9 @@ class SpaceKitServer {
     });
 
     if (this.dynamicDNS) {
-      // TODO: Perform DNS resolution of `${this.argv.server}.${this.argv.host}`
+      // TODO: Perform DNS resolution of `${Config.server}.${Config.host}`
       // only once, not on every request.
-      Dns.resolve4(`${this.argv.server}.${this.argv.host}`, (err, addresses) => {
+      Dns.resolve4(`${Config.server}.${Config.host}`, (err, addresses) => {
         if (err) {
           // TODO: Send an error back to the client.
         } else {
