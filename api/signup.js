@@ -16,13 +16,13 @@ module.exports = function SignUp (req, res, next) {
 
   Async.auto({
     validate: function (done) {
-      if (!req.body.hasOwnProperty('username') || req.body.username === '') {
+      if (!req.body.hasOwnProperty('username')) {
         reply.errors.push('`username` is required');
-      } else if (req.body.username.length <= 3) {
+      } else if (req.body.username.length < 3) {
         reply.errors.push('`username` must be at least 3 characters');
       }
 
-      if (!req.body.hasOwnProperty('email') || req.body.email === '') {
+      if (!req.body.hasOwnProperty('email')) {
         reply.errors.push('`email` is required');
       } else if (!ValidEmail(req.body.email)) {
         reply.errors.push('`email` has an invalid format');
