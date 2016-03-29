@@ -104,6 +104,7 @@ module.exports = function SignUp (req, res, next) {
           return done(true);
         }
 
+        reply.success = true;
         reply.username = results.username;
         reply.apikey = results.apikey.plain;
 
