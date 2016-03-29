@@ -10,7 +10,6 @@ module.exports = function SignUp (req, res, next) {
   var reply = {
     success: false,
     errors: [],
-    username: null,
     apikey: null
   };
 
@@ -105,13 +104,12 @@ module.exports = function SignUp (req, res, next) {
         }
 
         reply.success = true;
-        reply.username = results.username;
         reply.apikey = results.apikey.plain;
 
         done();
       });
     }]
-  }, (err, result) => {
+  }, (err, results) => {
     if (err) {
       // do nothing
     }
