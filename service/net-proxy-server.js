@@ -31,6 +31,9 @@ function createNetProxyServer (connectionHandler) {
         socket.end();
       }
     });
+    socket.on('error', (err) => {
+      console.log('net proxy socket error', err);
+    });
   });
 }
 

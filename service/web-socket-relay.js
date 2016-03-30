@@ -34,6 +34,10 @@ class WebSocketRelay {
         currentMessageHeader = null;
       }
     });
+
+    this.webSocket.on('error', (err) => {
+      console.log('ws relay error', err);
+    });
   }
 
   handleRelayMessage (header, data) {
@@ -84,6 +88,10 @@ class WebSocketRelay {
         connectionId: connectionId,
         type: 'close'
       }, null);
+    });
+
+    socket.on('error', (err) => {
+      console.log('ws relay addSocket error', hostname, err);
     });
   }
 }

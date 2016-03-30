@@ -4,7 +4,7 @@ const Bcrypt = require('bcrypt');
 const ValidEmail = require('email-validator').validate;
 const Uuid = require('node-uuid');
 
-module.exports = function SignUp (req, res, next) {
+module.exports = function SignUp (req, res) {
   var reply = {
     success: false,
     errors: [],

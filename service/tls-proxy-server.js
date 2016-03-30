@@ -18,6 +18,9 @@ function createTlsProxyServer (connectionHandler) {
       connectionHandler(socket, hostname);
       socket.resume();
     });
+    socket.on('error', (err) => {
+      console.log('tls proxy socket error', err);
+    });
   });
 }
 
