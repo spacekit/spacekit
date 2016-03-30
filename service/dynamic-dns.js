@@ -1,5 +1,4 @@
 'use strict';
-
 const AWS = require('aws-sdk');
 
 // TODO: configure these via a command-line flag instead

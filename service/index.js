@@ -5,12 +5,12 @@ const Fs = require('fs');
 const Https = require('https');
 const WebSocketServer = require('ws').Server;
 
-const ApiApp = require('../api');
+const ApiApp = require('./api');
 const CreateNetProxyServer = require('./net-proxy-server');
 const CreateTlsProxyServer = require('./tls-proxy-server');
-const Db = require('../util/db');
+const Db = require('./util/db');
 const DynamicDNS = require('./dynamic-dns');
-const WebApp = require('../www');
+const WebApp = require('./www');
 const WebSocketRelay = require('./web-socket-relay');
 
 /**
