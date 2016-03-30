@@ -95,7 +95,8 @@ class SpaceKitService {
       if (relay) {
         relay.addSocket(socket, hostname, 443);
       } else {
-        socket.end();
+        let message = 'Relay not connected';
+        socket.end(`HTTP/1.1 500 ${message}\r\n\r\n${message}`);
       }
     }
   }
@@ -114,7 +115,11 @@ class SpaceKitService {
   handleNetConnection (socket, hostname, path) {
     console.log('new Net connection', hostname);
 
-    if (hostname === this.apiHostname || hostname === this.webHostname) {
+    if (hostname === this.config.host) {
+      let response = 'HTTP/1.1 301 Moved Permanently\r\n' +
+                     `Location: https://${this.webHostname}${path}\r\n\r\n`;
+      socket.end(response);
+    } else if (hostname === this.apiHostname || hostname === this.webHostname) {
       let response = 'HTTP/1.1 301 Moved Permanently\r\n' +
                      `Location: https://${hostname}${path}\r\n\r\n`;
       socket.end(response);
@@ -128,7 +133,7 @@ class SpaceKitService {
       if (relay) {
         relay.addSocket(socket, hostname, 80);
       } else {
-        let message = 'No relays available';
+        let message = 'Relay not connected';
         socket.end(`HTTP/1.1 500 ${message}\r\n\r\n${message}`);
       }
     }
