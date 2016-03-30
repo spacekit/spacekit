@@ -3,8 +3,6 @@ const WebSocket = require('ws');
 const Net = require('net');
 const Backoff = require('backoff');
 
-const Config = require('../config');
-
 /**
  * A SpaceKitRelay proxies data between a SpaceKitServer and local servers.
  * Only TLS traffic is proxied; each app server must serve its own certificate.
@@ -16,9 +14,10 @@ const Config = require('../config');
  *          client                       tls-app  tls-app
  */
 class SpaceKitRelay {
-  constructor () {
-    this.url = `wss://${Config.service}.${Config.host}/`;
-    this.hostname = `${Config.relay}.${Config.username}.${Config.host}`;
+  constructor (config) {
+    this.config = config;
+    this.url = `wss://${config.service}.${config.host}/`;
+    this.hostname = `${config.relay}.${config.username}.${config.host}`;
 
     this.outgoingSockets = new Map();
 
@@ -31,23 +30,28 @@ class SpaceKitRelay {
       console.log(`Reconnecting in ${delay}ms.\n`);
     });
     this.backoff.on('ready', this.connect.bind(this));
+
     this.connect();
   }
 
   connect () {
     console.log(`Connecting to ${this.url}...`);
+
     this.ws = new WebSocket(this.url, 'spacekit', {
       headers: {
-        'x-spacekit-subdomain': Config.relay,
-        'x-spacekit-username': Config.username,
-        'x-spacekit-apikey': Config.apikey
+        'x-spacekit-subdomain': this.config.relay,
+        'x-spacekit-username': this.config.username,
+        'x-spacekit-apikey': this.config.apikey
       }
     });
+
     this.ws.on('open', () => {
       console.log(`Connected to service as ${this.hostname}`);
       this.backoff.reset();
     });
+
     let currentMessageHeader = null;
+
     this.ws.on('message', (data) => {
       if (!currentMessageHeader) {
         currentMessageHeader = JSON.parse(data);
@@ -69,6 +73,7 @@ class SpaceKitRelay {
   sendMessage (header, body) {
     if (this.ws.readyState === WebSocket.OPEN) {
       console.log('SEND', header, body && body.length);
+
       this.ws.send(JSON.stringify(header));
       this.ws.send(body || new Buffer(0));
     }
@@ -77,11 +82,14 @@ class SpaceKitRelay {
   handleMessage (header, body) {
     let id = header.connectionId;
     let socket = this.outgoingSockets.get(id);
+
     console.log('msg', JSON.stringify(header));
 
     if (header.type === 'open') {
       socket = Net.connect(header.port);
+
       this.outgoingSockets.set(id, socket);
+
       socket.on('data', (data) => {
         this.sendMessage({
           connectionId: id,

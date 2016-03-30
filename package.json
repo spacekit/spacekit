@@ -9,7 +9,8 @@
     "lint": "semistandard"
   },
   "bin": {
-    "spacekit": "./index.js"
+    "spacekit": "./bin/relay.js",
+    "spacekit-service": "./bin/service.js"
   },
   "repository": {
     "type": "git",

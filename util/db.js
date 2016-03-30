@@ -1,11 +1,13 @@
 'use strict';
 const Pg = require('pg').native;
 
-const Config = require('./config');
-
 class Db {
-  static run (query, params, callback) {
-    Pg.connect(Config.postgres, (err, client, done) => {
+  constructor (config) {
+    this.config = config;
+  }
+
+  run (query, params, callback) {
+    Pg.connect(this.config.pg, (err, client, done) => {
       if (err) {
         return callback(err);
       }

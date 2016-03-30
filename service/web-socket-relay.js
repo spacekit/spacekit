@@ -1,6 +1,5 @@
 'use strict';
-
-const uuid = require('node-uuid');
+const Uuid = require('node-uuid');
 const WebSocket = require('ws');
 
 /**
@@ -16,7 +15,6 @@ const WebSocket = require('ws');
  * For now, these messages just proxy socket messages ('open', 'data', 'close').
  */
 class WebSocketRelay {
-
   constructor (webSocket) {
     this.webSocket = webSocket;
     this.sockets = new Map();
@@ -62,7 +60,7 @@ class WebSocketRelay {
   }
 
   addSocket (socket, hostname, port) {
-    let connectionId = uuid.v4();
+    let connectionId = Uuid.v4();
 
     this.sockets.set(connectionId, socket);
 
