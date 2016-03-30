@@ -4,13 +4,10 @@ const Bcrypt = require('bcrypt');
 const ValidEmail = require('email-validator').validate;
 const Uuid = require('node-uuid');
 
-const Db = require('../db');
-
 module.exports = function SignUp (req, res, next) {
   var reply = {
     success: false,
     errors: [],
-    username: null,
     apikey: null
   };
 
@@ -18,8 +15,8 @@ module.exports = function SignUp (req, res, next) {
     validate: function (done) {
       if (!req.body.hasOwnProperty('username')) {
         reply.errors.push('`username` is required');
-      } else if (req.body.username.length < 3) {
-        reply.errors.push('`username` must be at least 3 characters');
+      } else if (req.body.username.length < 4) {
+        reply.errors.push('`username` must be at least 4 characters');
       }
 
       if (!req.body.hasOwnProperty('email')) {
@@ -34,7 +31,7 @@ module.exports = function SignUp (req, res, next) {
       let username = req.body.username;
       let query = 'SELECT id FROM users WHERE username = $1';
 
-      Db.run(query, [username], (err, result) => {
+      req.app.db.run(query, [username], (err, result) => {
         if (err) {
           reply.errors.push('exception during username check');
           return done(true);
@@ -52,7 +49,7 @@ module.exports = function SignUp (req, res, next) {
       let email = req.body.email;
       let query = 'SELECT id FROM users WHERE email = $1';
 
-      Db.run(query, [email], (err, result) => {
+      req.app.db.run(query, [email], (err, result) => {
         if (err) {
           reply.errors.push('exception during email check');
           return done(true);
@@ -98,20 +95,19 @@ module.exports = function SignUp (req, res, next) {
         results.apikey.hash
       ];
 
-      Db.run(query, params, (err, result) => {
+      req.app.db.run(query, params, (err, result) => {
         if (err) {
           reply.errors.push('exception during user insert');
           return done(true);
         }
 
         reply.success = true;
-        reply.username = results.username;
         reply.apikey = results.apikey.plain;
 
         done();
       });
     }]
-  }, (err, result) => {
+  }, (err, results) => {
     if (err) {
       // do nothing
     }

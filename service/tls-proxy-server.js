@@ -1,5 +1,5 @@
 'use strict';
-const net = require('net');
+const Net = require('net');
 
 /**
  * Create a server that extracts the hostname from incoming
@@ -7,10 +7,10 @@ const net = require('net');
  * hands you back the socket and hostname.
  *
  * @param {function(socket, hostname)} connectionHandler
- * @return {net.Server}
+ * @return {Net.Server}
  */
 function createTlsProxyServer (connectionHandler) {
-  return net.createServer((socket) => {
+  return Net.createServer((socket) => {
     socket.once('data', (initialData) => {
       socket.pause();
       socket.unshift(initialData);
