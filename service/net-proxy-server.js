@@ -2,11 +2,11 @@
 const Net = require('net');
 
 /**
- * Create a server that extracts the hostname from incoming
- * TLS (SNI) connections, puts the data back on the socket, and
- * hands you back the socket and hostname.
+ * Create a server that extracts the hostname and path from incoming Net
+ * connections, puts the data back on the socket, and hands you back the socket
+ * and hostname.
  *
- * @param {function(socket, hostname)} connectionHandler
+ * @param {function(socket, hostname, path)} connectionHandler
  * @return {Net.Server}
  */
 function createNetProxyServer (connectionHandler) {
