@@ -2,7 +2,7 @@
 const Yargs = require('yargs');
 
 const argv = Yargs
-  .usage(`Usage: spacekit \\
+  .usage(`Usage: spacekit-service \\
        --pg $PG_CONN_STR \\
        --dns $HOSTED_ZONE_ID \\
        --apiKey /path/to/key --apiCert /path/to/cert \\
