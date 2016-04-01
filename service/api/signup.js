@@ -5,7 +5,7 @@ const ValidEmail = require('email-validator').validate;
 const Uuid = require('node-uuid');
 
 module.exports = function SignUp (req, res) {
-  var reply = {
+  let reply = {
     success: false,
     errors: [],
     apikey: null
@@ -109,7 +109,7 @@ module.exports = function SignUp (req, res) {
     }]
   }, (err, results) => {
     if (err) {
-      // do nothing
+      console.log(err);
     }
 
     res.json(reply);
