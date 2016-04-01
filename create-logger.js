@@ -9,7 +9,7 @@ module.exports = function createLogger (name) {
       stream: process.stdout
     }, {
       type: 'rotating-file',
-      path: Path.resolve(__dirname, 'spacekit.log'),
+      path: Path.resolve(process.cwd(), 'spacekit.log'),
       period: '1d', // daily
       count: 3 // three rotations
     }]
