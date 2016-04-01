@@ -158,7 +158,7 @@ class SpaceKitService {
       return webSocket.close();
     }
 
-    let query = `SELECT id, apikey FROM users WHERE username = $1`;
+    let query = `SELECT id, api_key FROM users WHERE username = $1`;
 
     this.db.run(query, [username], (err, result) => {
       if (err) {
@@ -171,7 +171,7 @@ class SpaceKitService {
         return webSocket.close();
       }
 
-      Bcrypt.compare(apikey, result.rows[0].apikey, (err, pass) => {
+      Bcrypt.compare(apikey, result.rows[0].api_key, (err, pass) => {
         if (err) {
           console.log('ws auth failed', hostname, 'bcrypt compare error');
           return webSocket.close();

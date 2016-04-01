@@ -45,9 +45,42 @@ the complete hostname (ex: <web>.<host>)`
     host: {
       default: 'spacekit.io',
       describe: 'the root hostname of the service'
+    },
+    smtpHost: {
+      required: true,
+      default: 'smtp.gmail.com',
+      describe: 'the smtp host'
+    },
+    smtpPort: {
+      required: true,
+      default: 465,
+      describe: 'the smtp post'
+    },
+    smtpFrom: {
+      required: true,
+      default: 'SpaceKit <spacekit.io@gmail.com>',
+      describe: 'the smtp from address'
+    },
+    smtpUser: {
+      required: true,
+      describe: 'the smtp username'
+    },
+    smtpPass: {
+      required: true,
+      describe: 'the smtp password'
     }
   })
   .help()
   .argv;
+
+argv.nodemailer = {
+  host: argv.smtpHost,
+  port: argv.smtpPort,
+  secure: true,
+  auth: {
+    user: argv.smtpUser,
+    pass: argv.smtpPass
+  }
+};
 
 module.exports = argv;

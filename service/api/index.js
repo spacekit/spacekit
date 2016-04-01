@@ -2,12 +2,16 @@
 const BodyParser = require('body-parser');
 const Express = require('express');
 
-const SignUp = require('./signup');
 const Db = require('../util/db');
+const Mailer = require('../util/mailer');
+const Recover = require('./recover');
+const Reset = require('./reset');
+const SignUp = require('./signup');
 
 module.exports = function (config) {
   const api = Express();
 
+  api.mailer = new Mailer(config);
   api.db = new Db(config);
   api.use(BodyParser.json());
   api.use(BodyParser.urlencoded({ extended: true }));
@@ -16,6 +20,8 @@ module.exports = function (config) {
     res.json({ message: 'Welcome to the SpaceKit api.' });
   });
 
+  api.post('/recover', Recover);
+  api.post('/reset', Reset);
   api.post('/signup', SignUp);
 
   return api;
