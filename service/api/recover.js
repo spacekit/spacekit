@@ -102,7 +102,7 @@ module.exports = function Recover (req, res) {
     }]
   }, (err, results) => {
     if (err) {
-      console.log(err);
+      req.log.error(err);
     }
 
     // do nothing, we already completed the request

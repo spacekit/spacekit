@@ -1,6 +1,10 @@
 'use strict';
 const AWS = require('aws-sdk');
 
+const CreateLogger = require('../create-logger');
+
+const log = CreateLogger('DynamicDNS');
+
 // TODO: configure these via a command-line flag instead
 AWS.config.credentials = new AWS.SharedIniFileCredentials({
   profile: 'spacekit'
@@ -11,7 +15,6 @@ AWS.config.credentials = new AWS.SharedIniFileCredentials({
  * upserting individual hostname records.
  */
 class DynamicDNS {
-
   constructor (hostedZoneId) {
     this.hostedZoneId = hostedZoneId;
     this.route53 = new AWS.Route53();
@@ -39,7 +42,8 @@ class DynamicDNS {
       },
       HostedZoneId: this.hostedZoneId /* required */
     };
-    console.log('DNS:', hostname, '->', recordValue);
+
+    log.info({ dns: `${hostname} => ${recordValue}` });
 
     return new Promise((resolve, reject) => {
       this.route53.changeResourceRecordSets(params, function (err, data) {

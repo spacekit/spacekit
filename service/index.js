@@ -6,12 +6,15 @@ const Https = require('https');
 const WebSocketServer = require('ws').Server;
 
 const ApiApp = require('./api');
+const CreateLogger = require('../create-logger');
 const CreateNetProxyServer = require('./net-proxy-server');
 const CreateTlsProxyServer = require('./tls-proxy-server');
 const Db = require('./util/db');
 const DynamicDNS = require('./dynamic-dns');
 const WebApp = require('./www');
 const WebSocketRelay = require('./web-socket-relay');
+
+const log = CreateLogger('SpaceKitService');
 
 /**
  * The SpaceKitService listens for TLS connections. Depending on the hostname
@@ -55,7 +58,7 @@ class SpaceKitService {
       headers['Access-Control-Allow-Origin'] = '*';
     });
     this.wss.on('error', (err) => {
-      console.log('wss error event', err);
+      log.error(err, 'WebSocketServer error event');
     });
 
     // An HTTPS server will handle website requests. Note: This server doesn't
@@ -71,7 +74,7 @@ class SpaceKitService {
       this.dynamicDNS = new DynamicDNS(config.dnsZone);
     }
 
-    console.log('the service has started');
+    log.info('the service has started');
   }
 
   /**
@@ -84,7 +87,7 @@ class SpaceKitService {
    * if one is available.
    */
   handleTlsConnection (socket, hostname) {
-    console.log('new Tls connection', hostname);
+    log.info({ for: hostname }, 'new Tls connection');
 
     if (hostname === this.apiHostname) {
       this.apiServer.emit('connection', socket);
@@ -113,7 +116,7 @@ class SpaceKitService {
    * receive certificates.
    */
   handleNetConnection (socket, hostname, path) {
-    console.log('new Net connection', hostname);
+    log.info({ for: hostname, path: path }, 'new Net connection');
 
     if (hostname === this.config.host) {
       let response = 'HTTP/1.1 301 Moved Permanently\r\n' +
@@ -143,18 +146,20 @@ class SpaceKitService {
    * Authenticate an incoming connection from a client relay.
    */
   authenticateRelayConnection (webSocket) {
-    webSocket.on('error', (err) => {
-      console.log(`relay socket error event (${hostname})`, err);
-    });
-
     let subdomain = webSocket.upgradeReq.headers['x-spacekit-subdomain'];
     let username = webSocket.upgradeReq.headers['x-spacekit-username'];
     let apikey = webSocket.upgradeReq.headers['x-spacekit-apikey'];
     let hostname = `${subdomain}.${username}.${this.config.host}`;
     let existingRelay = this.relays.get(hostname);
 
+    webSocket.log = log.child({ for: hostname });
+
+    webSocket.on('error', (err) => {
+      webSocket.log.error({ err: err }, 'relay web socket error event');
+    });
+
     if (existingRelay) {
-      console.log('ws auth failed', hostname, 'already exists');
+      webSocket.log.info('relay auth failed (already exists)');
       return webSocket.close();
     }
 
@@ -162,27 +167,28 @@ class SpaceKitService {
 
     this.db.run(query, [username], (err, result) => {
       if (err) {
-        console.log('ws auth failed', hostname, 'db query error', err);
+        webSocket.log.error(err, 'relay auth failed (db query error)');
         return webSocket.close();
       }
 
       if (result.rows.length === 0) {
-        console.log('ws auth failed', hostname, 'not found');
+        webSocket.log.info('relay auth failed (user not found)');
         return webSocket.close();
       }
 
       Bcrypt.compare(apikey, result.rows[0].api_key, (err, pass) => {
         if (err) {
-          console.log('ws auth failed', hostname, 'bcrypt compare error');
+          webSocket.log.error(err, 'relay auth failed (bcrypt compare error)');
           return webSocket.close();
         }
 
         if (!pass) {
-          console.log('ws auth failed', hostname, 'apikey was incorrect');
+          webSocket.log.info('relay auth failed (api key incorrect)');
           return webSocket.close();
         }
 
-        console.log('ws auth success', hostname);
+        webSocket.log.info('relay auth success');
+
         this.handleRelayConnection(webSocket, hostname);
       });
     });
