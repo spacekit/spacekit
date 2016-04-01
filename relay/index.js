@@ -41,7 +41,7 @@ class SpaceKitRelay {
       headers: {
         'x-spacekit-subdomain': this.config.relay,
         'x-spacekit-username': this.config.username,
-        'x-spacekit-apikey': this.config.apikey
+        'x-spacekit-apikey': this.config.apiKey
       }
     });
 
