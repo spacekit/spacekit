@@ -109,7 +109,7 @@ module.exports = function Reset (req, res) {
     }]
   }, (err, results) => {
     if (err) {
-      console.log(err);
+      req.log.error(err);
     }
 
     res.json(reply);

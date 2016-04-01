@@ -34,10 +34,6 @@ class WebSocketRelay {
         currentMessageHeader = null;
       }
     });
-
-    this.webSocket.on('error', (err) => {
-      console.log('ws relay error', err);
-    });
   }
 
   handleRelayMessage (header, data) {
@@ -91,7 +87,7 @@ class WebSocketRelay {
     });
 
     socket.on('error', (err) => {
-      console.log('ws relay addSocket error', hostname, err);
+      this.webSocket.log.error(err, 'proxied socket error event');
     });
   }
 }

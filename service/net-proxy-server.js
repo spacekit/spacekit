@@ -1,6 +1,10 @@
 'use strict';
 const Net = require('net');
 
+const CreateLogger = require('../create-logger');
+
+const log = CreateLogger('CreateNetProxyServer');
+
 /**
  * Create a server that extracts the hostname and path from incoming Net
  * connections, puts the data back on the socket, and hands you back the socket
@@ -11,11 +15,18 @@ const Net = require('net');
  */
 function createNetProxyServer (connectionHandler) {
   return Net.createServer((socket) => {
+    socket.on('error', (err) => {
+      log.error(err, 'proxied socket error');
+    });
+
     let head = '';
+
     socket.on('data', (data) => {
       head = head + data.toString('ascii');
+
       try {
         let hostname = parseHostFromHeader(head);
+
         if (hostname) {
           let path = parsePathFromHeader(head);
           socket.removeAllListeners('data');
@@ -27,12 +38,9 @@ function createNetProxyServer (connectionHandler) {
           // Waiting for more data.
         }
       } catch (e) {
-        socket.write('HTTP/1.1 500 ' + e.toString() + '\r\n\r\n');
-        socket.end();
+        let message = 'Parsing exception';
+        socket.end(`HTTP/1.1 500 ${message}\r\n\r\n${message}`);
       }
-    });
-    socket.on('error', (err) => {
-      console.log('net proxy socket error', err);
     });
   });
 }

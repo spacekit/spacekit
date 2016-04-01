@@ -1,6 +1,10 @@
 'use strict';
 const Net = require('net');
 
+const CreateLogger = require('../create-logger');
+
+const log = CreateLogger('CreateTlsProxyServer');
+
 /**
  * Create a server that extracts the hostname from incoming
  * TLS (SNI) connections, puts the data back on the socket, and
@@ -10,18 +14,27 @@ const Net = require('net');
  * @return {Net.Server}
  */
 function createTlsProxyServer (connectionHandler) {
-  return Net.createServer((socket) => {
+  let server = Net.createServer((socket) => {
+    socket.on('error', (err) => {
+      log.error(err, 'proxied socket error');
+    });
+
     socket.once('data', (initialData) => {
       socket.pause();
       socket.unshift(initialData);
-      const hostname = extractHostnameFromSNIBuffer(initialData);
+
+      let hostname = extractHostnameFromSNIBuffer(initialData);
       connectionHandler(socket, hostname);
+
       socket.resume();
     });
-    socket.on('error', (err) => {
-      console.log('tls proxy socket error', err);
-    });
   });
+
+  server.on('error', (err) => {
+    log.error(err, 'tls server error event');
+  });
+
+  return server;
 }
 
 module.exports = createTlsProxyServer;
