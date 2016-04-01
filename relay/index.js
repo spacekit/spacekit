@@ -110,7 +110,10 @@ class SpaceKitRelay {
           type: 'close'
         }, null);
       });
-      socket.on('error', () => {
+      socket.on('error', (err) => {
+        let _data = { err: err, header: header };
+        log.error(_data, 'outgoing socket error event');
+
         this.sendMessage({
           connectionId: id,
           type: 'close'
