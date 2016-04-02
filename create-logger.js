@@ -2,16 +2,18 @@
 const Bunyan = require('bunyan');
 const Path = require('path');
 
+const log = Bunyan.createLogger({
+  name: 'SpaceKit',
+  streams: [{
+    stream: process.stdout
+  }, {
+    type: 'rotating-file',
+    path: Path.resolve(process.cwd(), 'spacekit.log'),
+    period: '1d', // daily
+    count: 3 // three rotations
+  }]
+});
+
 module.exports = function createLogger (name) {
-  return Bunyan.createLogger({
-    name: name,
-    streams: [{
-      stream: process.stdout
-    }, {
-      type: 'rotating-file',
-      path: Path.resolve(process.cwd(), 'spacekit.log'),
-      period: '1d', // daily
-      count: 3 // three rotations
-    }]
-  });
+  return log.child({ module: name });
 };
