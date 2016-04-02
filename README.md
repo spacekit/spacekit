@@ -23,6 +23,19 @@ Options:
 ```
 
 
+## Config file
+
+If there is a `spacekit.json` file in the directory you run `spacekit` from,
+we'll use it to configure the the cli.
+
+
+## Logs
+
+Log files will be stored in the directory you run `spacekit` from. They're
+named `spacekit.log` and will rotate for 3 days (`spacekit.log.0`,
+`spacekit.log.1`, etc..).
+
+
 ## License
 
 Apache License, Version 2.0
