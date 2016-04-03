@@ -19,6 +19,7 @@ Options:
   -h, --host      the root hostname of the service  [default: "spacekit.io"]
   -s, --service   the service subdomain; uses value with <host> to create
                   the complete hostname (ex: <service>.<host>)  [default: "api"]
+  --noProxy       disables the proxy and pings for dynamic dns instead
   --help          Show help  [boolean]
 ```
 
