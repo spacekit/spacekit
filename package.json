@@ -24,6 +24,7 @@
   "dependencies": {
     "backoff": "2.4.1",
     "bunyan": "1.8.0",
+    "letsencrypt": "^1.4.3",
     "ws": "1.0.1",
     "yargs": "4.2.0"
   },
