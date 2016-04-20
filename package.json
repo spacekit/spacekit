@@ -4,7 +4,7 @@
   "description": "",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "tap tests/*.js",
     "lint": "semistandard",
     "start": "node ./bin/index.js | bunyan"
   },
@@ -24,14 +24,17 @@
   "dependencies": {
     "backoff": "2.4.1",
     "bunyan": "1.8.0",
+    "letsencrypt": "1.4.3",
     "ws": "1.0.1",
     "yargs": "4.2.0"
   },
   "devDependencies": {
     "pre-commit": "1.1.2",
-    "semistandard": "7.0.5"
+    "semistandard": "7.0.5",
+    "tap": "5.7.1"
   },
   "pre-commit": [
-    "lint"
+    "lint",
+    "test"
   ]
 }

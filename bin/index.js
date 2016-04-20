@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 'use strict';
-const Config = require('../lib/config');
-const SpaceKitRelay = require('../lib');
+const parseConfig = require('../lib/config');
+const DynamicDns = require('../lib/dynamic-dns');
+const Relay = require('../lib/relay');
 
-module.exports = new SpaceKitRelay(Config);
+let config = parseConfig(process.argv, 'spacekit.json');
+
+if (config.noProxy) {
+  module.exports = new DynamicDns(config);
+} else {
+  module.exports = new Relay(config);
+}
