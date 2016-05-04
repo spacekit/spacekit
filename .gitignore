@@ -3,3 +3,4 @@ node_modules
 npm-debug.log
 spacekit.log*
 spacekit.json*
+spacekit-service.log*
