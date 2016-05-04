@@ -32,7 +32,7 @@
     "pre-commit": "1.1.2",
     "semistandard": "7.0.5",
     "tap": "5.7.1",
-    "spacekit-service": "2.1.1"
+    "spacekit-service": "2.x.x"
   },
   "pre-commit": [
     "lint",
