@@ -1,5 +1,5 @@
 'use strict';
-const t = require('tap');
+const tap = require('tap');
 const PortMap = require('../lib/port-map');
 
 [
@@ -16,7 +16,7 @@ const PortMap = require('../lib/port-map');
     destinationPort: testCase[3],
     string: testCase[0]
   };
-  t.same(
+  tap.same(
     PortMap.parsePortString(testCase[0]),
     expectedResult,
     `parsing "${testCase[0]}"`);
