@@ -22,11 +22,14 @@
   },
   "homepage": "https://github.com/spacekit/spacekit#readme",
   "dependencies": {
+    "async": "1.5.2",
     "backoff": "2.4.1",
     "bunyan": "1.8.0",
+    "commander": "2.9.0",
     "letsencrypt": "1.4.3",
-    "ws": "1.0.1",
-    "yargs": "4.2.0"
+    "promptly": "1.1.0",
+    "request": "2.72.0",
+    "ws": "1.0.1"
   },
   "devDependencies": {
     "pre-commit": "1.1.2",
