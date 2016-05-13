@@ -17,6 +17,9 @@ Options:
 
   -h, --help     output usage information
   -V, --version  output the version number
+  --recover      recover your api key
+  --reset        reset your api key with recovery token
+  --debug        change log level to debug
 ```
 
 

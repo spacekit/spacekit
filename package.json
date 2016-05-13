@@ -5,11 +5,10 @@
   "main": "./lib/index.js",
   "scripts": {
     "test": "tap tests/*.js",
-    "lint": "semistandard",
-    "start": "node ./bin/index.js | bunyan"
+    "lint": "semistandard"
   },
   "bin": {
-    "spacekit": "./bin/index.js"
+    "spacekit": "./bin/spacekit.js"
   },
   "repository": {
     "type": "git",
@@ -22,19 +21,19 @@
   },
   "homepage": "https://github.com/spacekit/spacekit#readme",
   "dependencies": {
-    "async": "1.5.2",
-    "backoff": "2.4.1",
-    "bunyan": "1.8.0",
-    "commander": "2.9.0",
-    "letsencrypt": "1.4.3",
-    "promptly": "1.1.0",
-    "request": "2.72.0",
-    "ws": "1.0.1"
+    "async": "1.x.x",
+    "backoff": "2.x.x",
+    "bunyan": "1.x.x",
+    "commander": "2.x.x",
+    "letsencrypt": "1.x.x",
+    "promptly": "1.x.x",
+    "request": "2.x.x",
+    "ws": "1.x.x"
   },
   "devDependencies": {
-    "pre-commit": "1.1.2",
-    "semistandard": "7.0.5",
-    "tap": "5.7.1",
+    "pre-commit": "1.x.x",
+    "semistandard": "7.x.x",
+    "tap": "5.x.x",
     "spacekit-service": "2.x.x"
   },
   "pre-commit": [
