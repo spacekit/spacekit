@@ -1,7 +1,7 @@
 'use strict';
 const tap = require('tap');
 const SpaceKitService = require('spacekit-service');
-const Relay = require('../lib/relay');
+const Relay = require('../lib/index');
 const PortMap = require('../lib/port-map');
 const Http = require('http');
 

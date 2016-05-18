@@ -1,5 +1,6 @@
 # SpaceKit
 
+
 ## Install
 
 ```bash
@@ -10,31 +11,68 @@ $ npm install spacekit -g
 ## Usage
 
 ```plain
-Usage: spacekit -r home -u rizzle -a 9e67e4d
+Usage: spacekit <name> [portMappings...]
 
 Options:
-  -r, --relay     the name of this relay  [required]
-  -u, --username  your spacekit username  [required]
-  -a, --apiKey    your spacekit api key  [required]
-  -h, --host      the root hostname of the service  [default: "spacekit.io"]
-  -s, --service   the service subdomain; uses value with <host> to create
-                  the complete hostname (ex: <service>.<host>)  [default: "api"]
-  --noProxy       disables the proxy and pings for dynamic dns instead
-  --help          Show help  [boolean]
+
+  -h, --help     output usage information
+  -V, --version  output the version number
+  --recover      recover your api key
+  --reset        reset your api key with recovery token
+  --debug        change log level to debug
+```
+
+
+## Examples
+
+### Serve a local website
+
+```bash
+$ spacekit laptop 8080
+```
+
+This will map traffic from laptop.<username>.spacekit.io to the website/app you
+have hosted on port 8080.
+
+
+## Mapping ports
+
+Port `443` is the default source port. So for brevity you can just supply the
+destination port (ex: `8080`).
+
+```bash
+$ spacekit laptop 8080
+
+# same as
+
+$ spacekit laptop 443:8080
+```
+
+You can even map to other computers on your local network.
+
+```bash
+$ spacekit laptop 443:192.168.0.12:8080
+```
+
+You're able to map multiple ports on a single relay. When doing do you need to
+be explicit. Port `443` and the port range `8000-8999` are valid source port
+options.
+
+```bash
+$ spacekit laptop 443:8080 8100:8100
 ```
 
 
 ## Config file
 
-If there is a `spacekit.json` file in the directory you run `spacekit` from,
-we'll use it to configure the the cli.
+Configuration is read from and written to `~/spacekit.json`.
 
 
 ## Logs
 
-Log files will be stored in the directory you run `spacekit` from. They're
-named `spacekit.log` and will rotate for 3 days (`spacekit.log.0`,
-`spacekit.log.1`, etc..).
+You can control the verbosity of logging via the `LOG_LEVEL` environment
+variable. Options include `trace`, `debug`, `info`, `warn`, `error` and
+`fatal`.
 
 
 ## License
