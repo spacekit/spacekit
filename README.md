@@ -65,7 +65,20 @@ $ spacekit laptop 443:8080 8100:8100
 
 ## Config file
 
-Configuration is read from and written to `~/spacekit.json`.
+Configuration is read from and written to `~/spacekit.json`. It's a simple JSON
+file with the following format.
+
+```json
+{
+  "service": "api",
+  "host": "spacekit.io",
+  "username": "<username>",
+  "apiKey": "<apiKey>"
+}
+```
+
+The `service` and `host` fields will only need to be changed if you're hosting
+your own [relay service](https://github.com/spacekit/spacekit-service).
 
 
 ## Logs
