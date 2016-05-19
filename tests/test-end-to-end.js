@@ -19,7 +19,7 @@ tap.test('end to end', (tap) => {
     });
 
     let map = new PortMap();
-    map.addFromString('' + httpPort);
+    map.addFromString('8000:' + httpPort);
     let relay = new Relay({
       noTls: true,
       relay: 'relay',
