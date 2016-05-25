@@ -31,7 +31,7 @@ Options:
 $ spacekit laptop 8080
 ```
 
-This will map traffic from laptop.<username>.spacekit.io to the website/app you
+This will map traffic from laptop.`username`.spacekit.io to the website/app you
 have hosted on port 8080.
 
 
