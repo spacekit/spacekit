@@ -24,12 +24,23 @@ let state = {
   email: undefined
 };
 
+const USAGE = `\
+<name> [portMappings...]
+
+  Examples:
+
+    # Expose an HTTP server running on localhost:8080
+    spacekit laptop 8080
+
+    # Expose an IP camera from your local network
+    spacekit camera 192.168.1.2:80`;
+
 Commander
   .version(PackageJson.version)
   .option('--recover', 'recover your api key')
   .option('--reset', 'reset your api key with recovery token')
   .option('--debug', 'change log level to debug')
-  .usage('<name> [portMappings...]')
+  .usage(USAGE)
   .parse(process.argv)
 ;
 
