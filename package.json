@@ -23,11 +23,13 @@
   "dependencies": {
     "async": "1.x.x",
     "backoff": "2.x.x",
+    "bufferutil": "1.x.x",
     "bunyan": "1.x.x",
     "commander": "2.x.x",
     "letsencrypt": "1.x.x",
     "promptly": "1.x.x",
     "request": "2.x.x",
+    "utf-8-validate": "1.x.x",
     "ws": "1.x.x"
   },
   "devDependencies": {
