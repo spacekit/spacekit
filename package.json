@@ -27,6 +27,7 @@
     "bunyan": "1.x.x",
     "commander": "2.x.x",
     "letsencrypt": "1.x.x",
+    "pem": "1.x.x",
     "promptly": "1.x.x",
     "request": "2.x.x",
     "utf-8-validate": "1.x.x",
@@ -36,7 +37,7 @@
     "pre-commit": "1.x.x",
     "semistandard": "7.x.x",
     "tap": "5.x.x",
-    "spacekit-service": "2.x.x"
+    "spacekit-service": "3.x.x"
   },
   "pre-commit": [
     "lint",
