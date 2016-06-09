@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 const Async = require('async');
+const checkForUpdates = require('../lib/check-for-updates');
 const Commander = require('commander');
 const Fs = require('fs');
 const Os = require('os');
@@ -80,6 +81,9 @@ if (Commander.recover) {
 function init () {
   if (state.configFileExists) {
     startRelay();
+    // Asynchronously check for updates to this package, so as to not delay
+    // the startup time of the relay.
+    checkForUpdates();
   } else {
     signupRequest();
   }
