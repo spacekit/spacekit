@@ -10,8 +10,9 @@ const Path = require('path');
 const PortMap = require('../lib/port-map');
 const Promptly = require('promptly');
 const Request = require('request');
+const MkdirP = require('mkdirp');
 
-let configPath = Path.resolve(Os.homedir(), 'spacekit.json');
+let configPath = Path.resolve(Os.homedir(), '.spacekit/config.json');
 let config = {
   service: 'api',
   host: 'spacekit.io',
@@ -308,6 +309,7 @@ function configure () {
 function saveConfig () {
   let contents = JSON.stringify(config, undefined, 2);
 
+  MkdirP.sync(Path.resolve(Os.homedir(), '.spacekit'));
   Fs.writeFile(configPath, contents, (err) => {
     if (err) {
       console.log('Error: saving config failed');
